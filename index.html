@@ -1,0 +1,932 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>研究費申請書支援ツール — 静岡大学</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;500;700&family=Noto+Serif+JP:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+:root{--sh:#003F8A;--sl:#1A5FAD;--sp:#EBF1FA;--ac:#E8A020;--ap:#FDF3E0;--ok:#2E7D32;--okp:#E8F5E9;--ng:#C62828;--tx:#1A1A2E;--txm:#5A6070;--txl:#8A8FA0;--bd:#D8DCE8;--bdl:#ECEEF4;--bg:#F4F6FB;--f:'Noto Sans JP',sans-serif;--fs:'Noto Serif JP',serif;--r:10px;--rs:6px;--s:0 2px 12px rgba(0,63,138,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;font-family:var(--f);font-size:14px;color:var(--tx);background:var(--bg)}
+
+/* ===== SCREENS ===== */
+.screen{display:none;min-height:100vh}
+.screen.show{display:flex}
+
+/* LOGIN */
+#s-login{flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#001F5C,#003F8A,#1A5FAD);padding:2rem}
+.login-logo{text-align:center;margin-bottom:2rem}
+.login-icon{width:68px;height:68px;background:rgba(255,255,255,.15);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto 1rem;border:1.5px solid rgba(255,255,255,.3)}
+.login-icon i{font-size:30px;color:#fff}
+.login-logo h1{font-family:var(--fs);font-size:21px;color:#fff;font-weight:600;margin-bottom:.25rem}
+.login-logo p{font-size:12px;color:rgba(255,255,255,.7);letter-spacing:.04em}
+.login-card{background:#fff;border-radius:16px;padding:2.25rem;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-card h2{font-size:17px;font-weight:500;margin-bottom:.35rem}
+.login-card>p{font-size:13px;color:var(--txm);margin-bottom:1.5rem;line-height:1.7}
+.btn-ms{width:100%;padding:.78rem 1rem;border:none;border-radius:var(--rs);background:var(--sh);color:#fff;font-family:var(--f);font-size:13.5px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:.55rem;transition:background .15s;margin-bottom:.75rem}
+.btn-ms:hover{background:var(--sl)}
+.divider{text-align:center;font-size:12px;color:var(--txl);margin:.85rem 0;position:relative}
+.divider::before,.divider::after{content:'';position:absolute;top:50%;width:40%;height:1px;background:var(--bdl)}
+.divider::before{left:0}.divider::after{right:0}
+.note{font-size:11.5px;color:var(--txl);text-align:center;line-height:1.6;margin-top:1rem}
+
+/* ONBOARDING */
+#s-onboard{flex-direction:column;align-items:center;justify-content:center;background:var(--bg);padding:2rem}
+.ob-card{background:#fff;border-radius:16px;padding:2.25rem;width:100%;max-width:560px;box-shadow:0 4px 24px rgba(0,63,138,.12)}
+.ob-steps{display:flex;border:1.5px solid var(--bd);border-radius:var(--rs);overflow:hidden;margin-bottom:1.75rem}
+.ob-step{flex:1;padding:.42rem .4rem;font-size:11px;text-align:center;color:var(--txl);border-right:1px solid var(--bd);background:#fff}
+.ob-step:last-child{border-right:none}
+.ob-step.done{background:var(--okp);color:var(--ok)}
+.ob-step.active{background:var(--sp);color:var(--sh);font-weight:500}
+.ob-card h2{font-size:16px;font-weight:600;margin-bottom:.3rem}
+.ob-card>p{font-size:13px;color:var(--txm);margin-bottom:1.25rem;line-height:1.65}
+.ob-panel{display:none}.ob-panel.show{display:block}
+.user-badge{background:var(--okp);border:1px solid #A5D6A7;border-radius:var(--rs);padding:.5rem .8rem;font-size:12px;color:var(--ok);margin-bottom:1rem;display:flex;align-items:center;gap:.4rem}
+
+/* APP */
+#s-app{display:none;height:100vh;flex-direction:column}
+#s-app.show{display:flex}
+.topbar{background:var(--sh);display:flex;align-items:center;padding:0 1.1rem;gap:.65rem;height:52px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.2);z-index:10}
+.topbar-logo{display:flex;align-items:center;gap:.55rem;font-family:var(--fs);font-size:14.5px;color:#fff;font-weight:600;padding-right:.85rem;border-right:1px solid rgba(255,255,255,.2)}
+.topbar-logo-icon{width:30px;height:30px;background:rgba(255,255,255,.2);border-radius:7px;display:flex;align-items:center;justify-content:center}
+.topbar-logo-icon i{font-size:15px;color:#fff}
+.topbar-sub{font-size:11.5px;color:rgba(255,255,255,.7);flex:1;padding-left:.2rem}
+.topbar-user{display:flex;align-items:center;gap:.45rem;font-size:12px;color:rgba(255,255,255,.9)}
+.topbar-avatar{width:28px;height:28px;border-radius:50%;background:rgba(255,255,255,.25);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500;color:#fff;border:1.5px solid rgba(255,255,255,.4)}
+.topbar-new{padding:.34rem .75rem;background:var(--ac);color:#fff;border:none;border-radius:var(--rs);font-family:var(--f);font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;gap:.35rem}
+.topbar-new:hover{background:#C8880C}
+.topbar-logout{padding:.3rem .6rem;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);color:#fff;border-radius:var(--rs);font-size:12px;cursor:pointer;font-family:var(--f)}
+
+.app-body{display:flex;flex:1;overflow:hidden}
+.sidebar{width:210px;background:#fff;border-right:1px solid var(--bdl);overflow-y:auto;flex-shrink:0;padding:.6rem 0}
+.nav-sec{font-size:9.5px;font-weight:500;color:var(--txl);letter-spacing:.07em;text-transform:uppercase;padding:.55rem 1rem .15rem}
+.nav-item{display:flex;align-items:center;gap:.55rem;padding:.44rem 1rem;font-size:12.5px;color:var(--txm);cursor:pointer;border-left:3px solid transparent;transition:all .15s}
+.nav-item:hover{color:var(--sh);background:var(--sp)}
+.nav-item.on{color:var(--sh);border-left-color:var(--sh);background:var(--sp);font-weight:500}
+.nav-item i{font-size:14px;width:17px;text-align:center}
+.nav-badge{font-size:9.5px;padding:1px 5px;border-radius:100px;margin-left:auto}
+.nb-ac{background:var(--ap);color:#9A6000}
+.main{flex:1;overflow-y:auto;padding:1.35rem}
+
+/* PANES */
+.pane{display:none}.pane.on{display:block}
+.pane-title{font-family:var(--fs);font-size:19px;font-weight:600;margin-bottom:1.1rem;display:flex;align-items:center;gap:.4rem}
+.pane-title i{color:var(--sh);font-size:18px}
+
+/* CARDS */
+.card{background:#fff;border:1px solid var(--bdl);border-radius:var(--r);padding:1rem 1.15rem;margin-bottom:.9rem;box-shadow:var(--s)}
+.card-title{font-size:13px;font-weight:500;margin-bottom:.65rem;display:flex;align-items:center;gap:.35rem}
+.card-title i{color:var(--sh)}
+.card.accent{border-left:3px solid var(--sh)}
+.card.warn{border-left:3px solid var(--ac);background:var(--ap)}
+.card.ok{border-left:3px solid var(--ok);background:var(--okp)}
+.card.info{background:var(--sp);border:1px solid #C5D8F0}
+
+/* FORMS */
+.fg{margin-bottom:.85rem}
+.fg label{display:block;font-size:11.5px;font-weight:500;color:var(--txm);margin-bottom:.28rem}
+.fg input,.fg select,.fg textarea{width:100%;padding:.55rem .75rem;border:1.5px solid var(--bd);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx);background:#fff;transition:border-color .15s}
+.fg input:focus,.fg select:focus,.fg textarea:focus{outline:none;border-color:var(--sh)}
+.fg textarea{resize:vertical;min-height:75px;line-height:1.6}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:.4rem;padding:.44rem .85rem;border:1.5px solid var(--bd);border-radius:var(--rs);background:#fff;font-family:var(--f);font-size:13px;cursor:pointer;color:var(--tx);transition:all .15s}
+.btn:hover{border-color:var(--sh);color:var(--sh);background:var(--sp)}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.p{background:var(--sh);color:#fff;border-color:var(--sh)}
+.btn.p:hover{background:var(--sl);color:#fff}
+.btn.sm{font-size:12px;padding:.3rem .6rem}
+.btn-row{display:flex;gap:.45rem;flex-wrap:wrap;margin-top:.65rem}
+
+/* STATS */
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem;margin-bottom:.9rem}
+.stat{background:#fff;border-radius:var(--r);padding:.8rem .9rem;box-shadow:var(--s);border-top:3px solid var(--sh)}
+.stat-n{font-size:24px;font-weight:700;color:var(--sh)}
+.stat-n.w{color:#9A6000}.stat-n.g{color:var(--ok)}
+.stat-l{font-size:11px;color:var(--txm);margin-top:2px}
+
+/* ALERTS */
+.alert{display:flex;align-items:flex-start;gap:.6rem;padding:.6rem .8rem;border-radius:var(--rs);margin-bottom:.45rem;font-size:13px}
+.alert i{font-size:15px;flex-shrink:0;margin-top:1px}
+.alert.blue{background:var(--sp);color:var(--sh);border:1px solid #C5D8F0}
+.alert.amber{background:var(--ap);color:#7A4F00;border:1px solid #F0CC80}
+.alert.green{background:var(--okp);color:var(--ok);border:1px solid #A5D6A7}
+
+/* OUTPUT */
+.output{background:var(--bg);border:1.5px solid var(--bd);border-radius:var(--rs);padding:.8rem .95rem;font-size:13px;line-height:1.85;min-height:90px;white-space:pre-wrap;color:var(--tx)}
+.output.muted{color:var(--txl);font-style:italic}
+
+/* CHAT */
+.chat-msgs{display:flex;flex-direction:column;gap:.5rem;min-height:160px;max-height:260px;overflow-y:auto;padding:.85rem;background:var(--bg);border:1.5px solid var(--bd);border-bottom:none;border-radius:var(--rs) var(--rs) 0 0}
+.msg{max-width:88%;padding:.52rem .82rem;border-radius:11px;font-size:13px;line-height:1.7}
+.msg.ai{background:#fff;color:var(--tx);align-self:flex-start;border:1px solid var(--bdl)}
+.msg.user{background:var(--sh);color:#fff;align-self:flex-end}
+.chat-input{display:flex;gap:.45rem;padding:.6rem;background:#fff;border:1.5px solid var(--bd);border-radius:0 0 var(--rs) var(--rs)}
+.chat-input input{flex:1;padding:.45rem .7rem;border:1.5px solid var(--bd);border-radius:var(--rs);font-family:var(--f);font-size:13px;color:var(--tx)}
+.chat-input input:focus{outline:none;border-color:var(--sh)}
+.chips{display:flex;flex-wrap:wrap;margin-top:.45rem}
+.chip{display:inline-flex;align-items:center;gap:.25rem;padding:.26rem .6rem;border:1px solid var(--bd);border-radius:100px;font-size:11.5px;cursor:pointer;color:var(--txm);background:#fff;margin:2px;transition:all .15s}
+.chip:hover{border-color:var(--sh);color:var(--sh);background:var(--sp)}
+
+/* INFO ROW */
+.irow{display:flex;gap:.65rem;font-size:13px;padding:.38rem 0;border-bottom:1px solid var(--bdl)}
+.irow:last-child{border-bottom:none}
+.ilabel{color:var(--txl);min-width:120px;font-size:11.5px;flex-shrink:0;padding-top:1px}
+.ival{color:var(--tx);flex:1;line-height:1.6}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:13px}
+.tbl th{background:var(--sp);color:var(--sh);font-weight:500;padding:.5rem .8rem;text-align:left;font-size:12px;border-bottom:2px solid var(--sh)}
+.tbl td{padding:.48rem .8rem;border-bottom:1px solid var(--bdl)}
+.tbl tr:hover td{background:var(--sp)}
+
+/* BADGE */
+.badge{display:inline-flex;padding:2px 7px;border-radius:100px;font-size:11px;font-weight:500}
+.badge.blue{background:var(--sp);color:var(--sh)}
+.badge.amber{background:var(--ap);color:#9A6000}
+.badge.green{background:var(--okp);color:var(--ok)}
+.badge.gray{background:#F0F1F5;color:#5A6070}
+
+/* SPINNER */
+.spin{display:inline-block;width:13px;height:13px;border:2px solid #D0D8E8;border-top-color:var(--sh);border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:4px}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* PROGRESS */
+.prog-row{display:flex;align-items:center;gap:.65rem;margin-bottom:.45rem;font-size:13px}
+.prog-bar{flex:1;height:5px;background:var(--bdl);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--sh);border-radius:3px}
+
+/* SEARCH CHIPS */
+.search-chips{display:flex;flex-wrap:wrap;gap:.35rem}
+
+/* APIKEY WARN */
+.apikey-warn{background:#FFF8E1;border:1px solid #FFE082;border-radius:var(--rs);padding:.6rem .85rem;font-size:12px;color:#5D4037;margin-bottom:.75rem;display:flex;align-items:flex-start;gap:.45rem}
+.apikey-warn i{color:#F57C00;flex-shrink:0;margin-top:1px}
+</style>
+</head>
+<body>
+
+<!-- ===== LOGIN ===== -->
+<div id="s-login" class="screen show">
+  <div class="login-logo">
+    <div class="login-icon"><i class="fas fa-file-alt"></i></div>
+    <h1>研究費申請書支援ツール</h1>
+    <p>静岡大学 人文社会科学部</p>
+  </div>
+  <div class="login-card">
+    <h2>サインイン</h2>
+    <p>大学メールアドレスで登録してください。入力したデータはあなた専用として保存され、他の利用者には見えません。</p>
+    <div class="fg"><label>大学メールアドレス</label>
+      <input type="email" id="l-email" placeholder="xxx@shizuoka.ac.jp" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <div class="fg"><label>氏名</label>
+      <input type="text" id="l-name" placeholder="山田 太郎" onkeydown="if(event.key==='Enter')login()">
+    </div>
+    <button class="btn-ms" onclick="login()"><i class="fas fa-sign-in-alt"></i> ログイン</button>
+    <p class="note">データはブラウザ内にのみ保存されます。サーバーには送信されません。<br>他の利用者のデータと混ざることはありません。</p>
+  </div>
+</div>
+
+<!-- ===== ONBOARDING ===== -->
+<div id="s-onboard" class="screen">
+  <div class="ob-card">
+    <div class="ob-steps">
+      <div class="ob-step active" id="ob-s1">① 基本情報</div>
+      <div class="ob-step" id="ob-s2">② 研究情報</div>
+      <div class="ob-step" id="ob-s3">③ 完了</div>
+    </div>
+
+    <!-- Step 1 -->
+    <div class="ob-panel show" id="ob-p1">
+      <h2>基本情報を入力してください</h2>
+      <p>一度入力すれば次回から自動入力されます。あなた専用のデータとして保存されます。</p>
+      <div class="user-badge"><i class="fas fa-shield-alt"></i><span id="ob-email-badge"></span> 専用として保存されます</div>
+      <div class="g2">
+        <div class="fg"><label>氏名（漢字）</label><input type="text" id="ob-name" placeholder="山田 太郎"></div>
+        <div class="fg"><label>氏名（ローマ字）</label><input type="text" id="ob-roman" placeholder="Yamada Taro"></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>所属学部</label>
+          <select id="ob-faculty">
+            <option value="">選択してください</option>
+            <option>人文社会科学部</option><option>教育学部</option><option>理学部</option>
+            <option>農学部</option><option>工学部</option><option>情報学部</option><option>グローバル共創科学部</option>
+          </select>
+        </div>
+        <div class="fg"><label>学科・専攻</label><input type="text" id="ob-dept" placeholder="言語文化学科"></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>職位</label>
+          <select id="ob-pos"><option>教授</option><option>准教授</option><option>講師</option><option>助教</option><option>特任教授</option><option>その他</option></select>
+        </div>
+        <div class="fg"><label>メールアドレス</label><input type="email" id="ob-email" placeholder="xxx@shizuoka.ac.jp"></div>
+      </div>
+      <div class="g2">
+        <div class="fg"><label>電話番号</label><input type="text" id="ob-tel" placeholder="054-238-XXXX"></div>
+        <div class="fg"><label>e-Rad 研究者番号</label><input type="text" id="ob-rno" placeholder="12345678"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn p" onclick="obGo(2)">次へ <i class="fas fa-arrow-right"></i></button>
+      </div>
+    </div>
+
+    <!-- Step 2 -->
+    <div class="ob-panel" id="ob-p2">
+      <h2>研究情報を入力してください</h2>
+      <p>申請書の文章生成に使われます。箇条書きやキーワードでもOKです。</p>
+      <div class="fg"><label>専門分野・キーワード（カンマ区切り）</label><input type="text" id="ob-kw" placeholder="例：記述言語学，方言学，無形文化遺産保存"></div>
+      <div class="fg"><label>主な業績・代表論文（申請書の業績欄に自動入力）</label>
+        <textarea id="ob-works" placeholder="例：山田太郎（2024）「○○の研究」○○学会誌 Vol.X, pp.XX-XX."></textarea>
+      </div>
+      <div class="fg"><label>過去の申請書・採択実績（任意）</label>
+        <textarea id="ob-past" style="min-height:55px" placeholder="例：科研費基盤C採択（2021-2026）、学部長裁量経費（R5〜）など"></textarea>
+      </div>
+      <div class="fg"><label>Claude APIキー（管理者から配布されたキー）</label>
+        <input type="password" id="ob-key" placeholder="sk-ant-api03-...">
+      </div>
+      <div class="apikey-warn"><i class="fas fa-info-circle"></i>
+        <span>APIキーはこのブラウザのみに保存され、サーバーには送信されません。管理者（zhang.shengkai@shizuoka.ac.jp）にお問い合わせください。</span>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="obGo(1)"><i class="fas fa-arrow-left"></i> 戻る</button>
+        <button class="btn p" onclick="obFinish()">保存して開始 <i class="fas fa-check"></i></button>
+      </div>
+    </div>
+
+    <!-- Step 3 -->
+    <div class="ob-panel" id="ob-p3" style="text-align:center;padding:1.5rem 0">
+      <div style="width:60px;height:60px;background:var(--okp);border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto .9rem">
+        <i class="fas fa-check" style="font-size:26px;color:var(--ok)"></i>
+      </div>
+      <h3 style="font-size:17px;margin-bottom:.4rem">セットアップ完了！</h3>
+      <p style="color:var(--txm);font-size:13px;margin-bottom:1.25rem">申請書ツールを使い始められます。</p>
+      <button class="btn p" onclick="startApp()">ツールを開く <i class="fas fa-arrow-right"></i></button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== APP ===== -->
+<div id="s-app">
+  <div class="topbar">
+    <div class="topbar-logo">
+      <div class="topbar-logo-icon"><i class="fas fa-file-alt"></i></div>
+      申請書支援ツール
+    </div>
+    <span class="topbar-sub">静岡大学 研究費申請書 AI支援システム</span>
+    <button class="topbar-new" onclick="nav('email')"><i class="fas fa-plus"></i> 新規作成</button>
+    <div class="topbar-user">
+      <div class="topbar-avatar" id="t-avatar">?</div>
+      <span id="t-name">—</span>
+      <button class="topbar-logout" onclick="doLogout()"><i class="fas fa-sign-out-alt"></i></button>
+    </div>
+  </div>
+  <div class="app-body">
+    <div class="sidebar">
+      <div class="nav-sec">メイン</div>
+      <div class="nav-item on" id="n-dash" onclick="nav('dash')"><i class="fas fa-th-large"></i>ダッシュボード</div>
+      <div class="nav-item" id="n-email" onclick="nav('email')"><i class="fas fa-envelope-open-text"></i>メール→書類生成</div>
+      <div class="nav-item" id="n-alert" onclick="nav('alert')"><i class="fas fa-bell"></i>募集情報<span class="nav-badge nb-ac">新着</span></div>
+      <div class="nav-item" id="n-writer" onclick="nav('writer')"><i class="fas fa-pen-nib"></i>AI文章生成</div>
+      <div class="nav-item" id="n-word" onclick="nav('word')"><i class="fas fa-file-word"></i>Word出力</div>
+      <div class="nav-sec">データ</div>
+      <div class="nav-item" id="n-db" onclick="nav('db')"><i class="fas fa-database"></i>書類DB</div>
+      <div class="nav-item" id="n-upload" onclick="nav('upload')"><i class="fas fa-upload"></i>書類アップロード</div>
+      <div class="nav-sec">設定</div>
+      <div class="nav-item" id="n-profile" onclick="nav('profile')"><i class="fas fa-user-circle"></i>プロフィール</div>
+      <div class="nav-item" id="n-admin" onclick="nav('admin')"><i class="fas fa-cog"></i>管理者設定</div>
+    </div>
+    <div class="main">
+
+      <!-- DASH -->
+      <div class="pane on" id="p-dash">
+        <div class="pane-title"><i class="fas fa-th-large"></i>ダッシュボード</div>
+        <div class="stats">
+          <div class="stat"><div class="stat-n w" id="s-days">—</div><div class="stat-l">日後が最短締切</div></div>
+          <div class="stat"><div class="stat-n" id="s-docs">0</div><div class="stat-l">登録済み書類</div></div>
+          <div class="stat"><div class="stat-n" style="color:var(--ac)">新着</div><div class="stat-l">募集情報あり</div></div>
+          <div class="stat"><div class="stat-n g" id="s-ok">0</div><div class="stat-l">採択済み</div></div>
+        </div>
+        <div class="card info">
+          <div class="card-title"><i class="fas fa-robot"></i>AIからのサジェスト</div>
+          <div style="font-size:13px;color:var(--sh);line-height:1.85">
+            <div style="margin-bottom:.4rem"><i class="fas fa-lightbulb"></i> 募集メールが届いたら「メール→書類生成」に貼るだけで下書きを自動作成できます。</div>
+            <div style="margin-bottom:.4rem"><i class="fas fa-upload"></i> 過去の申請書をアップロードすると、AI生成の精度が上がります。</div>
+            <div><i class="fas fa-bell"></i> 「募集情報」タブで主要な助成金の公募状況を確認できます。</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn p sm" onclick="nav('email')"><i class="fas fa-envelope-open-text"></i> メールを貼り付ける</button>
+            <button class="btn sm" onclick="nav('alert')"><i class="fas fa-bell"></i> 新着情報を見る</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-clock"></i>あなたの締切一覧</div>
+          <div id="d-deadlines" style="color:var(--txm);font-size:13px">書類をアップロードするか入力すると締切が表示されます。</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-chart-bar"></i>書類完成度</div>
+          <div id="d-progress" style="color:var(--txm);font-size:13px">書類を登録すると進捗が表示されます。</div>
+        </div>
+      </div>
+
+      <!-- EMAIL -->
+      <div class="pane" id="p-email">
+        <div class="pane-title"><i class="fas fa-envelope-open-text"></i>メール転送 → 書類自動生成</div>
+        <div class="card ok">
+          <div class="card-title"><i class="fas fa-info-circle"></i>使い方</div>
+          <div style="font-size:13px;color:#1B5E20;line-height:1.85">
+            <div><strong>① 届いた募集メールの本文をそのまま下に貼る</strong>（転送メールのテキストごとでOK）</div>
+            <div><strong>② 「自動生成」を押す</strong> → AIがあなたのプロフィールと過去書類を参照して下書きを作成</div>
+            <div><strong>③ 確認・修正 → Word出力</strong></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-paste"></i>募集メールを貼り付け</div>
+          <div class="fg"><label>メール全文</label>
+            <textarea id="e-text" style="min-height:155px" placeholder="件名：令和9年度 ○○助成 公募について&#10;本文：..."></textarea>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>テンプレート</label>
+              <select id="e-tpl"><option value="auto">自動判定（推奨）</option><option>科研費</option><option>学部長裁量経費</option><option>学長裁量経費</option><option>民間研究助成</option><option>地域連携応援PJ</option></select>
+            </div>
+            <div class="fg"><label>参照する過去書類</label>
+              <select id="e-ref"><option value="all">登録済みの全書類（推奨）</option><option value="none">参照なし</option></select>
+            </div>
+          </div>
+          <button class="btn p" id="e-btn" onclick="genEmail()"><i class="fas fa-magic"></i> 書類を自動生成する</button>
+        </div>
+        <div class="card" id="e-result" style="display:none">
+          <div class="card-title"><i class="fas fa-file-alt"></i>生成結果 <span class="badge green" style="margin-left:auto">完了</span></div>
+          <div class="output" id="e-output"></div>
+          <div class="btn-row">
+            <button class="btn p sm" onclick="nav('word')"><i class="fas fa-file-word"></i> Word出力する</button>
+            <button class="btn sm" onclick="copyEl('e-output')"><i class="fas fa-copy"></i> コピー</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ALERT -->
+      <div class="pane" id="p-alert">
+        <div class="pane-title"><i class="fas fa-bell"></i>募集情報・アラート</div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-bell"></i>新着アラート</div>
+          <div class="alert blue"><i class="fas fa-star"></i><div><div style="font-weight:500">【新着】科研費 基盤研究B・C 公募開始予定</div><div style="font-size:12px;margin-top:2px">締切：2026年9月下旬（例年）</div></div></div>
+          <div class="alert amber"><i class="fas fa-clock"></i><div><div style="font-weight:500">【確認】学部長裁量経費 締切 6月18日</div><div style="font-size:12px;margin-top:2px">所属部局の事務長に提出してください</div></div></div>
+          <div class="alert green"><i class="fas fa-check-circle"></i><div><div style="font-weight:500">Googleカレンダーに締切を登録するとリマインダーが届きます</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-search"></i>関連募集をウェブで検索</div>
+          <div class="search-chips">
+            <span class="chip" onclick="sg('科研費 公募 2026 2027')"><i class="fas fa-external-link-alt"></i> 科研費</span>
+            <span class="chip" onclick="sg('サントリー文化財団 研究助成 公募 2027')"><i class="fas fa-external-link-alt"></i> サントリー財団</span>
+            <span class="chip" onclick="sg('三菱財団 人文科学研究助成 公募 2027')"><i class="fas fa-external-link-alt"></i> 三菱財団</span>
+            <span class="chip" onclick="sg('静岡大学 学長裁量経費 学部長裁量経費 公募')"><i class="fas fa-external-link-alt"></i> 学長・学部長裁量経費</span>
+            <span class="chip" onclick="sg('ふじのくに地域大学コンソーシアム 助成 公募 2027')"><i class="fas fa-external-link-alt"></i> ふじのくに</span>
+            <span class="chip" onclick="sg('民間研究助成 人文 2027 公募')"><i class="fas fa-external-link-alt"></i> 民間助成（人文系）</span>
+            <span class="chip" onclick="sg('南アルプス学会 研究助成 公募')"><i class="fas fa-external-link-alt"></i> 南アルプス学会</span>
+            <span class="chip" onclick="sg('かめのり財団 多文化共生 助成 2027')"><i class="fas fa-external-link-alt"></i> かめのり財団</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WRITER -->
+      <div class="pane" id="p-writer">
+        <div class="pane-title"><i class="fas fa-pen-nib"></i>AI文章生成</div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-sliders-h"></i>生成設定</div>
+          <div class="g2">
+            <div class="fg"><label>申請書の種類</label>
+              <select id="w-type"><option value="kakenhi_b">科研費 基盤B</option><option value="kakenhi_c">科研費 基盤C</option><option value="gakubu">学部長裁量経費</option><option value="gakucho">学長裁量経費</option><option value="josei">民間研究助成</option><option value="chiiki">地域連携応援PJ</option><option value="festa">キャンパスフェスタ</option></select>
+            </div>
+            <div class="fg"><label>生成するセクション</label>
+              <select id="w-sec"><option value="purpose">研究目的・概要</option><option value="background">研究の背景・意義</option><option value="originality">独自性・新規性</option><option value="plan">研究計画・方法</option><option value="history">これまでの実績</option><option value="outcome">期待される成果</option><option value="budget_text">予算の使途説明</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>追加指示（任意）</label><textarea id="w-note" style="min-height:48px" placeholder="例：400字以内で、英語で書いて、○○を強調して、など"></textarea></div>
+          <button class="btn p" id="w-btn" onclick="genSection()"><i class="fas fa-magic"></i> 生成する</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-file-alt"></i>生成結果 <span class="badge gray" id="w-status" style="margin-left:auto">待機中</span></div>
+          <div class="output muted" id="w-output">設定を選んで「生成する」を押してください。プロフィールの情報が自動参照されます。</div>
+          <div class="btn-row">
+            <button class="btn sm" id="w-copy" onclick="copyEl('w-output')" disabled><i class="fas fa-copy"></i> コピー</button>
+            <button class="btn sm" id="w-refine" onclick="refine()" disabled><i class="fas fa-wand-magic-sparkles"></i> 改善する</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-comments"></i>AIに相談</div>
+          <div class="chat-msgs" id="chat"></div>
+          <div class="chat-input">
+            <input type="text" id="c-q" placeholder="例：科研費の独自性の書き方は？" onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn p sm" onclick="sendChat()"><i class="fas fa-paper-plane"></i></button>
+          </div>
+          <div class="chips">
+            <span class="chip" onclick="qc('採択率を上げる申請書の書き方を教えて')">採択率アップ</span>
+            <span class="chip" onclick="qc('基盤Bと基盤Cの書き方の違いを教えて')">基盤B vs C</span>
+            <span class="chip" onclick="qc('独自性・新規性の効果的な書き方を教えて')">独自性の書き方</span>
+            <span class="chip" onclick="qc('予算計画の旅費・謝金の書き方を教えて')">予算計画</span>
+            <span class="chip" onclick="qc('英語アブストラクトを書くコツを教えて')">英語アブスト</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- WORD -->
+      <div class="pane" id="p-word">
+        <div class="pane-title"><i class="fas fa-file-word"></i>Word出力</div>
+        <div class="card ok"><div class="card-title"><i class="fas fa-check-circle"></i>プロフィール情報が自動入力されます</div>
+          <div style="font-size:13px;color:#1B5E20">内容を入力して「Word出力」を押すとClaudeがWordファイルを生成します（このチャット画面で出力されます）。</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-cog"></i>出力設定</div>
+          <div class="g2">
+            <div class="fg"><label>書類の種類</label>
+              <select id="wd-type"><option>学部長裁量経費申請書（様式2）</option><option>学長裁量経費申請書</option><option>科研費申請書</option><option>民間研究助成申請書</option><option>地域連携応援PJ申請書</option><option>報告書</option></select>
+            </div>
+            <div class="fg"><label>年度</label>
+              <select id="wd-yr"><option>令和8（2026）年度</option><option>令和9（2027）年度</option></select>
+            </div>
+          </div>
+          <div class="fg"><label>研究題目・プロジェクト名</label><input type="text" id="wd-title" placeholder="例：○○に関する研究"></div>
+          <div class="fg"><label>研究概要・目的（AI生成結果を貼り付けても可）</label><textarea id="wd-body" style="min-height:100px"></textarea></div>
+          <div class="g2">
+            <div class="fg"><label>申請金額</label><input type="text" id="wd-budget" placeholder="例：300,000円"></div>
+            <div class="fg"><label>研究期間</label><input type="text" id="wd-period" placeholder="例：令和8年4月〜令和9年3月"></div>
+          </div>
+          <button class="btn p" onclick="genWord()"><i class="fas fa-file-word"></i> Word出力する（Claudeが生成）</button>
+        </div>
+      </div>
+
+      <!-- DB -->
+      <div class="pane" id="p-db">
+        <div class="pane-title"><i class="fas fa-database"></i>書類データベース</div>
+        <div class="card">
+          <div id="db-view" style="font-size:13px;color:var(--txm)">書類をアップロードするとここに一覧が表示されます。</div>
+        </div>
+      </div>
+
+      <!-- UPLOAD -->
+      <div class="pane" id="p-upload">
+        <div class="pane-title"><i class="fas fa-upload"></i>書類アップロード → 自動情報抽出</div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-paste"></i>書類の内容を貼り付けて抽出</div>
+          <div class="fg"><label>書類の内容（PDFやWordからコピー＆ペースト）</label>
+            <textarea id="up-text" style="min-height:130px" placeholder="ここに書類の内容を貼り付けてください..."></textarea>
+          </div>
+          <div class="g2">
+            <div class="fg"><label>書類の種類</label><select id="up-type"><option value="auto">自動判定</option><option>科研費</option><option>学部長裁量経費</option><option>民間助成</option><option>その他</option></select></div>
+            <div class="fg"><label>抽出項目</label><select id="up-focus"><option value="all">すべて</option><option>予算のみ</option><option>メンバーのみ</option><option>研究目的のみ</option></select></div>
+          </div>
+          <button class="btn p" id="up-btn" onclick="extract()"><i class="fas fa-magic"></i> AIで情報を抽出する</button>
+        </div>
+        <div class="card" id="up-result" style="display:none">
+          <div class="card-title"><i class="fas fa-check"></i>抽出結果</div>
+          <div class="output" id="up-output"></div>
+          <div class="btn-row">
+            <button class="btn sm" onclick="copyEl('up-output')"><i class="fas fa-copy"></i> コピー</button>
+            <button class="btn p sm" onclick="saveToDb()"><i class="fas fa-database"></i> DBに追加する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROFILE -->
+      <div class="pane" id="p-profile">
+        <div class="pane-title"><i class="fas fa-user-circle"></i>プロフィール</div>
+        <div class="card ok"><div class="card-title"><i class="fas fa-shield-alt"></i>あなた専用のデータ — 他の利用者には見えません</div></div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-id-card"></i>登録済み情報</div>
+          <div id="prof-view"></div>
+          <div class="btn-row" style="margin-top:.75rem">
+            <button class="btn p sm" onclick="editProf()"><i class="fas fa-edit"></i> 編集する</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ADMIN -->
+      <div class="pane" id="p-admin">
+        <div class="pane-title"><i class="fas fa-cog"></i>管理者設定</div>
+        <div class="card warn"><div class="card-title"><i class="fas fa-exclamation-triangle"></i>管理者専用</div>
+          <div style="font-size:13px;color:#5D4037">APIキーの配布・ユーザー管理を行います。</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-key"></i>APIキー管理</div>
+          <div class="fg"><label>共通 Claude APIキー（利用者に配布するキー）</label><input type="password" id="ad-key" placeholder="sk-ant-api03-..."></div>
+          <div class="apikey-warn"><i class="fas fa-info-circle"></i>
+            <span>このキーを利用者に口頭または内線で伝えてください。利用者はプロフィール設定のAPIキー欄に入力します。<br>使用量確認：<a href="https://console.anthropic.com" target="_blank" style="color:var(--sh)">console.anthropic.com</a></span>
+          </div>
+          <button class="btn p sm" onclick="saveKey()"><i class="fas fa-save"></i> 保存</button>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fas fa-users"></i>登録ユーザー（<span id="u-count">0</span>名）</div>
+          <div id="u-list" style="font-size:13px;color:var(--txm)">ユーザーが登録されるとここに表示されます。</div>
+        </div>
+        <div class="card">
+          <div class="card-title"><i class="fab fa-github"></i>GitHub Pages への設置方法</div>
+          <div style="font-size:13px;color:var(--txm);line-height:1.9">
+            <div><strong>1.</strong> github.com にログイン → 「New repository」→ 名前を <code style="background:#F0F1F5;padding:1px 5px;border-radius:3px">grant-tool</code> で作成（Public）</div>
+            <div><strong>2.</strong> 「Add file」→「Upload files」→ このHTMLファイルを <code style="background:#F0F1F5;padding:1px 5px;border-radius:3px">index.html</code> という名前でアップロード</div>
+            <div><strong>3.</strong> Settings → Pages → Source：main / (root) → Save</div>
+            <div><strong>4.</strong> 数分後に <code style="background:#F0F1F5;padding:1px 5px;border-radius:3px">https://【ユーザー名】.github.io/grant-tool/</code> でアクセス可能になります</div>
+          </div>
+          <div class="btn-row">
+            <button class="btn sm" onclick="dlHtml()"><i class="fas fa-download"></i> index.htmlとしてダウンロード</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /main -->
+  </div><!-- /app-body -->
+</div><!-- /s-app -->
+
+<script>
+// ===== USER-ISOLATED STORAGE =====
+let _user = null;
+let _prof = null;
+const _chatHist = [];
+let _writerResult = '';
+let _uploadResult = '';
+
+const NS = (email) => 'gt_' + (email||'').replace(/[^a-z0-9]/gi,'_').toLowerCase();
+
+function saveProf(p) {
+  if(!p?.email) return;
+  localStorage.setItem(NS(p.email)+'_prof', JSON.stringify(p));
+  localStorage.setItem('gt_last', p.email);
+}
+function loadProfByEmail(email) {
+  if(!email) return null;
+  try { const v = localStorage.getItem(NS(email)+'_prof'); return v ? JSON.parse(v) : null; } catch(e){ return null; }
+}
+function loadLastProf() {
+  const last = localStorage.getItem('gt_last');
+  return last ? loadProfByEmail(last) : null;
+}
+function saveUserDb(items) {
+  if(!_prof?.email) return;
+  localStorage.setItem(NS(_prof.email)+'_db', JSON.stringify(items));
+}
+function loadUserDb() {
+  if(!_prof?.email) return [];
+  try { const v = localStorage.getItem(NS(_prof.email)+'_db'); return v ? JSON.parse(v) : []; } catch(e){ return []; }
+}
+function addUser(name, email) {
+  let u = [];
+  try { u = JSON.parse(localStorage.getItem('gt_users')||'[]'); } catch(e){}
+  if(!u.find(x=>x.email===email)) u.push({name,email,joined:new Date().toISOString().slice(0,10)});
+  localStorage.setItem('gt_users', JSON.stringify(u));
+}
+function loadUsers() {
+  try { return JSON.parse(localStorage.getItem('gt_users')||'[]'); } catch(e){ return []; }
+}
+function getKey() { return _prof?.apikey || localStorage.getItem('gt_key') || ''; }
+
+// ===== SHOW/HIDE SCREENS =====
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('show'));
+  document.getElementById('s-app').classList.remove('show');
+  if(id === 'app') {
+    document.getElementById('s-app').classList.add('show');
+  } else {
+    document.getElementById('s-'+id).classList.add('show');
+  }
+}
+
+// ===== LOGIN =====
+function login() {
+  const email = document.getElementById('l-email').value.trim();
+  const name  = document.getElementById('l-name').value.trim();
+  if(!email || !name) { alert('メールアドレスと氏名を入力してください'); return; }
+  if(!email.includes('@')) { alert('正しいメールアドレスを入力してください'); return; }
+  _user = {name, email};
+  _prof = loadProfByEmail(email);
+  if(_prof) {
+    initApp();
+  } else {
+    document.getElementById('ob-email-badge').textContent = email;
+    document.getElementById('ob-name').value  = name;
+    document.getElementById('ob-email').value = email;
+    showScreen('onboard');
+  }
+}
+
+// ===== ONBOARDING =====
+function obGo(step) {
+  if(step === 2) {
+    if(!document.getElementById('ob-name').value || !document.getElementById('ob-faculty').value) {
+      alert('氏名と所属学部を入力してください'); return;
+    }
+    document.getElementById('ob-p1').classList.remove('show');
+    document.getElementById('ob-p2').classList.add('show');
+    document.getElementById('ob-s1').className = 'ob-step done';
+    document.getElementById('ob-s2').className = 'ob-step active';
+  } else {
+    document.getElementById('ob-p2').classList.remove('show');
+    document.getElementById('ob-p1').classList.add('show');
+    document.getElementById('ob-s1').className = 'ob-step active';
+    document.getElementById('ob-s2').className = 'ob-step';
+  }
+}
+
+function obFinish() {
+  _prof = {
+    name:         document.getElementById('ob-name').value,
+    nameRoman:    document.getElementById('ob-roman').value,
+    faculty:      document.getElementById('ob-faculty').value,
+    dept:         document.getElementById('ob-dept').value,
+    pos:          document.getElementById('ob-pos').value,
+    email:        document.getElementById('ob-email').value,
+    tel:          document.getElementById('ob-tel').value,
+    researcherNo: document.getElementById('ob-rno').value,
+    keywords:     document.getElementById('ob-kw').value,
+    works:        document.getElementById('ob-works').value,
+    past:         document.getElementById('ob-past').value,
+    apikey:       document.getElementById('ob-key').value,
+  };
+  saveProf(_prof);
+  addUser(_prof.name, _prof.email);
+  document.getElementById('ob-p2').classList.remove('show');
+  document.getElementById('ob-p3').classList.add('show');
+  document.getElementById('ob-s2').className = 'ob-step done';
+  document.getElementById('ob-s3').className = 'ob-step active';
+}
+
+function startApp() {
+  initApp();
+}
+
+// ===== INIT APP =====
+function initApp() {
+  showScreen('app');
+  const name = _prof?.name || _user?.name || '?';
+  document.getElementById('t-name').textContent   = name;
+  document.getElementById('t-avatar').textContent = name.charAt(0)||'?';
+  const db = loadUserDb();
+  document.getElementById('s-docs').textContent = db.length;
+  document.getElementById('s-ok').textContent   = db.filter(d=>d.status==='採択済').length;
+  renderDb(db);
+  renderProf();
+  renderAdmin();
+  // Chat init message
+  const chat = document.getElementById('chat');
+  if(!chat.children.length) {
+    const m = document.createElement('div');
+    m.className = 'msg ai';
+    m.textContent = '申請書の書き方について何でも相談してください。採択率のコツや審査員が重視するポイントもお答えします。';
+    chat.appendChild(m);
+  }
+}
+
+// ===== NAV =====
+function nav(id) {
+  document.querySelectorAll('.pane').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('on'));
+  const p = document.getElementById('p-'+id);
+  const n = document.getElementById('n-'+id);
+  if(p) p.classList.add('on');
+  if(n) n.classList.add('on');
+}
+
+// ===== CLAUDE API =====
+async function callClaude(sys, msg) {
+  const key = getKey();
+  if(!key) {
+    alert('APIキーが設定されていません。\n「プロフィール」→ 編集 → APIキー欄に入力するか、\n「管理者設定」タブで設定してください。');
+    throw new Error('no key');
+  }
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01'
+    },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514',
+      max_tokens: 1000,
+      system: sys,
+      messages: [{role:'user', content:msg}]
+    })
+  });
+  if(!res.ok) { const e=await res.json(); throw new Error(e.error?.message||'APIエラー'); }
+  const d = await res.json();
+  return d.content?.map(b=>b.text||'').join('') || '';
+}
+
+function profStr() {
+  if(!_prof) return '（プロフィール未設定）';
+  return `氏名：${_prof.name}、所属：${_prof.faculty}${_prof.dept}、職位：${_prof.pos}、メール：${_prof.email}、専門：${_prof.keywords||'未設定'}、業績：${_prof.works||'未登録'}、過去の申請：${_prof.past||'未登録'}`;
+}
+function dbStr() {
+  const db = loadUserDb();
+  if(!db.length) return '（過去の書類が登録されていません）';
+  return db.map(d=>`・${d.name}（${d.year}、${d.status}）${d.summary?'：'+d.summary:''}`).join('\n');
+}
+
+// ===== EMAIL → 書類 =====
+async function genEmail() {
+  const text = document.getElementById('e-text').value.trim();
+  if(!text) { alert('メールの内容を貼り付けてください'); return; }
+  const btn = document.getElementById('e-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>生成中...';
+  try {
+    const result = await callClaude(
+      '日本の大学教員の研究費申請書作成を専門とするAIです。募集メールから情報を抽出し、申請書にふさわしい文体で下書きを作成してください。',
+      `以下の募集メールから①募集概要（締切・金額・条件を箇条書き）と②申請書下書き（研究目的・計画・成果、400字程度）を生成してください。\n\n【申請者情報】\n${profStr()}\n\n【過去の申請書】\n${dbStr()}\n\n【募集メール】\n${text.slice(0,3000)}`
+    );
+    document.getElementById('e-output').textContent = result;
+    document.getElementById('e-result').style.display = 'block';
+  } catch(e) { if(e.message!=='no key') alert('エラー: '+e.message); }
+  btn.disabled=false; btn.innerHTML='<i class="fas fa-magic"></i> 書類を自動生成する';
+}
+
+// ===== AI文章生成 =====
+const SEC_L = {purpose:'研究目的・概要',background:'研究の背景・意義',originality:'独自性・新規性',plan:'研究計画・方法',history:'これまでの実績・準備状況',outcome:'期待される成果',budget_text:'予算の使途説明'};
+const DOC_L = {kakenhi_b:'科研費基盤B',kakenhi_c:'科研費基盤C',gakubu:'学部長裁量経費',gakucho:'学長裁量経費',josei:'民間研究助成',chiiki:'地域連携応援PJ',festa:'キャンパスフェスタ'};
+
+async function genSection() {
+  const type = document.getElementById('w-type').value;
+  const sec  = document.getElementById('w-sec').value;
+  const note = document.getElementById('w-note').value.trim();
+  const btn  = document.getElementById('w-btn');
+  const box  = document.getElementById('w-output');
+  const st   = document.getElementById('w-status');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>生成中...';
+  box.className='output muted'; box.textContent='生成中...';
+  st.className='badge amber'; st.textContent='生成中';
+  try {
+    _writerResult = await callClaude(
+      '日本の研究費申請書の文章生成専門AIです。提供された情報のみを使用し、申請書にふさわしい文体で生成してください。記載のない情報は推測・補完しないでください。',
+      `${DOC_L[type]||type}の「${SEC_L[sec]||sec}」を申請書文体で200〜350字で生成してください。\n\n【申請者情報】\n${profStr()}\n\n【過去の申請書】\n${dbStr()}\n${note?'\n【追加指示】'+note:''}\n\n本文のみ出力してください。`
+    );
+    box.className='output'; box.textContent=_writerResult;
+    st.className='badge green'; st.textContent='完了';
+    document.getElementById('w-copy').disabled=false;
+    document.getElementById('w-refine').disabled=false;
+  } catch(e) {
+    box.textContent='エラー: '+e.message;
+    st.className='badge gray'; st.textContent='エラー';
+  }
+  btn.disabled=false; btn.innerHTML='<i class="fas fa-magic"></i> 生成する';
+}
+function refine() {
+  if(!_writerResult) return;
+  document.getElementById('w-note').value = '以下の文章をより申請書らしく、説得力のある表現に改善してください：\n'+_writerResult;
+  genSection();
+}
+
+// ===== CHAT =====
+async function sendChat() {
+  const q = document.getElementById('c-q').value.trim();
+  if(!q) return;
+  document.getElementById('c-q').value = '';
+  const chat = document.getElementById('chat');
+  const um = document.createElement('div'); um.className='msg user'; um.textContent=q; chat.appendChild(um);
+  const wt = document.createElement('div'); wt.className='msg ai'; wt.innerHTML='<span class="spin"></span>'; chat.appendChild(wt);
+  chat.scrollTop = chat.scrollHeight;
+  _chatHist.push({role:'user',content:q});
+  try {
+    const key = getKey();
+    if(!key){wt.textContent='APIキーが設定されていません。';return;}
+    const res = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:600,
+        system:'日本の大学教員の研究費申請書作成アドバイザーです。実践的なアドバイスを簡潔な日本語でお答えください。',
+        messages:_chatHist})
+    });
+    const d = await res.json();
+    const reply = d.content?.map(b=>b.text||'').join('')||'エラー';
+    _chatHist.push({role:'assistant',content:reply});
+    wt.innerHTML = reply.replace(/\n/g,'<br>');
+  } catch(e){wt.textContent='エラー: '+e.message;}
+  chat.scrollTop = chat.scrollHeight;
+}
+function qc(t){document.getElementById('c-q').value=t;sendChat();}
+
+// ===== WORD =====
+function genWord() {
+  const p = _prof||{};
+  const info = [
+    `書類種類：${document.getElementById('wd-type').value}`,
+    `年度：${document.getElementById('wd-yr').value}`,
+    `研究題目：${document.getElementById('wd-title').value}`,
+    `研究概要：${document.getElementById('wd-body').value}`,
+    `申請金額：${document.getElementById('wd-budget').value}`,
+    `研究期間：${document.getElementById('wd-period').value}`,
+    `申請者：${p.name||''}（${p.faculty||''}${p.dept||''}・${p.pos||''}）`,
+    `メール：${p.email||''}`,
+    `研究者番号：${p.researcherNo||''}`
+  ].join('\n');
+  if(typeof sendPrompt==='function'){
+    sendPrompt('以下の情報でWord（.docx）申請書ファイルを生成してください：\n\n'+info);
+  } else {
+    alert('Claudeのチャット画面で以下を送ってください：\n\n「以下の情報でWord申請書を生成してください：\n'+info+'\n」');
+  }
+}
+
+// ===== UPLOAD / EXTRACT =====
+async function extract() {
+  const text = document.getElementById('up-text').value.trim();
+  if(!text){alert('内容を貼り付けてください');return;}
+  const btn = document.getElementById('up-btn');
+  btn.disabled=true; btn.innerHTML='<span class="spin"></span>抽出中...';
+  try {
+    _uploadResult = await callClaude(
+      '研究費申請書から情報を抽出するAIです。記載情報のみを正確に抽出し、推測・補完はしないでください。',
+      `以下の書類から【書類種類・年度】【申請者・研究メンバー】【研究目的・概要】【予算・申請金額】【期間・締切】を抽出してください：\n\n${text.slice(0,3000)}`
+    );
+    document.getElementById('up-output').textContent = _uploadResult;
+    document.getElementById('up-result').style.display = 'block';
+  } catch(e){if(e.message!=='no key')alert('エラー: '+e.message);}
+  btn.disabled=false; btn.innerHTML='<i class="fas fa-magic"></i> AIで情報を抽出する';
+}
+
+function saveToDb() {
+  const db = loadUserDb();
+  const lines = _uploadResult.split('\n');
+  const name = lines.find(l=>l.includes('書類種類'))?.replace(/【.*?】/,'').trim()||'（タイトル不明）';
+  db.push({name, type:'—', status:'—', year:'—', summary:_uploadResult.slice(0,80)});
+  saveUserDb(db);
+  renderDb(db);
+  document.getElementById('s-docs').textContent = db.length;
+  alert('DBに追加しました。「書類DB」タブで確認できます。');
+}
+
+// ===== RENDER =====
+function renderDb(db) {
+  const el = document.getElementById('db-view');
+  if(!db||!db.length){el.innerHTML='<div style="color:var(--txm);font-size:13px">書類をアップロードするとここに一覧が表示されます。</div>';return;}
+  const bc={科研費:'blue',民間:'gray',学内:'blue',地域連携:'green'};
+  const sc={申請中:'amber',採択済:'green',作成中:'amber'};
+  el.innerHTML=`<table class="tbl"><thead><tr><th>書類名</th><th>種別</th><th>状態</th><th>年度</th></tr></thead><tbody>
+    ${db.map(g=>`<tr><td>${g.name||''}</td><td><span class="badge ${bc[g.type]||'gray'}">${g.type||''}</span></td><td><span class="badge ${sc[g.status]||'gray'}">${g.status||''}</span></td><td style="color:var(--txl)">${g.year||''}</td></tr>`).join('')}
+  </tbody></table>`;
+}
+
+function renderProf() {
+  const el = document.getElementById('prof-view');
+  if(!_prof){el.innerHTML='<div style="color:var(--txm)">プロフィールが登録されていません。</div>';return;}
+  el.innerHTML=[
+    ['氏名（漢字）',_prof.name||'—'],['氏名（ローマ字）',_prof.nameRoman||'—'],
+    ['所属学部',_prof.faculty||'—'],['学科・専攻',_prof.dept||'—'],
+    ['職位',_prof.pos||'—'],['メールアドレス',_prof.email||'—'],
+    ['電話番号',_prof.tel||'—'],['研究者番号',_prof.researcherNo||'—'],
+    ['専門分野',_prof.keywords||'—'],
+    ['APIキー',_prof.apikey?'設定済み（••••）':'未設定'],
+  ].map(([l,v])=>`<div class="irow"><span class="ilabel">${l}</span><span class="ival">${v}</span></div>`).join('');
+}
+
+function renderAdmin() {
+  const users = loadUsers();
+  document.getElementById('u-count').textContent = users.length;
+  if(users.length>0){
+    document.getElementById('u-list').innerHTML=users.map(u=>
+      `<div style="padding:.3rem 0;border-bottom:1px solid var(--bdl);font-size:13px">${u.name}（${u.email}）<span style="float:right;font-size:11px;color:var(--txl)">${u.joined||''}</span></div>`
+    ).join('');
+  }
+}
+
+// ===== UTILS =====
+function copyEl(id){
+  navigator.clipboard.writeText(document.getElementById(id).textContent).then(()=>{
+    const el=document.getElementById(id);el.style.background='var(--okp)';setTimeout(()=>el.style.background='',1500);
+  });
+}
+function sg(q){window.open('https://www.google.com/search?q='+encodeURIComponent(q),'_blank');}
+function doLogout(){_user=null;_prof=null;localStorage.removeItem('gt_last');showScreen('login');}
+function editProf(){
+  if(_prof){
+    document.getElementById('ob-name').value=_prof.name||'';
+    document.getElementById('ob-roman').value=_prof.nameRoman||'';
+    document.getElementById('ob-faculty').value=_prof.faculty||'';
+    document.getElementById('ob-dept').value=_prof.dept||'';
+    document.getElementById('ob-pos').value=_prof.pos||'教授';
+    document.getElementById('ob-email').value=_prof.email||'';
+    document.getElementById('ob-tel').value=_prof.tel||'';
+    document.getElementById('ob-rno').value=_prof.researcherNo||'';
+    document.getElementById('ob-kw').value=_prof.keywords||'';
+    document.getElementById('ob-works').value=_prof.works||'';
+    document.getElementById('ob-past').value=_prof.past||'';
+    document.getElementById('ob-key').value=_prof.apikey||'';
+    document.getElementById('ob-email-badge').textContent=_prof.email||'';
+    document.getElementById('ob-p1').classList.add('show');
+    document.getElementById('ob-p2').classList.remove('show');
+    document.getElementById('ob-p3').classList.remove('show');
+  }
+  showScreen('onboard');
+}
+function saveKey(){const k=document.getElementById('ad-key').value.trim();if(!k){alert('入力してください');return;}localStorage.setItem('gt_key',k);alert('保存しました。');}
+function dlHtml(){const a=document.createElement('a');a.href=window.location.href;a.download='index.html';a.click();}
+
+// ===== AUTO LOGIN =====
+window.addEventListener('DOMContentLoaded',()=>{
+  _prof = loadLastProf();
+  if(_prof){
+    _user = {name:_prof.name, email:_prof.email};
+    initApp();
+  }
+});
+</script>
+</body>
+</html>
